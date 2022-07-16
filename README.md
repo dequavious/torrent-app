@@ -1,7 +1,7 @@
 # TORRENT CLIENT APPLICATION
 A torrent application that scrapes https://www.1377x.to/ and displays the name, seeds, leeches and size for each torrent 
 in a table. Users are able to page through the search results and can start a download by double-clicking on the torrent 
-they want in the table. Users are also able to start a torrent download manually by uploading a ".torrent" file or by
+they want. Users are also able to start a torrent download manually by uploading a ".torrent" file or by
 pasting a magnet link. Multiple concurrent torrent downloads are possible as well configuring settings such as file 
 priorities, adding trackers, enabling sequential downloads, etc. Torrent downloads as well as their settings are saved
 and will resume when the app is started again.
