@@ -1,12 +1,19 @@
 import time
+
 import libtorrent as lt
 
 
 class Torrent:
     def get_metadata(self):
-        while not self.handle.has_metadata():
-            time.sleep(1)
-        self.info = self.handle.get_torrent_info()
+        try:
+            while not self.handle.has_metadata():
+                time.sleep(1)
+            self.info = self.handle.get_torrent_info()
+        except RuntimeError:
+            pass
+
+    def stop(self):
+        self.session.remove_torrent(self.handle)
 
     def resume(self):
         self.handle.resume()
@@ -14,11 +21,11 @@ class Torrent:
     def pause(self):
         self.handle.pause()
 
-    def stop(self):
-        self.handle.stop_when_ready(True)
-
-    def seeding(self):
-        return self.handle.status().state == lt.torrent_status.seeding
+    def seeding_or_stopped(self):
+        try:
+            return self.handle.status().state == lt.torrent_status.seeding
+        except RuntimeError:
+            return True
 
     def get_files(self):
         files = []
@@ -84,14 +91,20 @@ class Torrent:
         for priority in priorities:
             self.set_file_priority(priority[0], priority[1])
 
-    def __init__(self, name, handle, info, magnet_link, filepath, priorities=None, sequential=False):
+    def __init__(self, session, name, handle, info, magnet_link, filepath, priorities=None, sequential=False):
         self.state = ['queued', 'checking', 'fetching meta-info', 'downloading', 'finished', 'seeding', 'allocating',
                       'checking resume data']
+        self.session = session
         self.name = name
         self.handle = handle
         self.info = info
         self.magnet_link = magnet_link
         self.filepath = filepath
+
+        self.handle.auto_managed(False)
+        self.handle.stop_when_ready(True)
+        self.handle.queue_position_top()
+        self.handle.resume()
 
         if priorities is not None:
             self.set_priorities(priorities)

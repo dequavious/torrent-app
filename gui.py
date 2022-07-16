@@ -45,7 +45,7 @@ class GUI:
             class File:
 
                 def track_progress(self):
-                    while not (self.root.torrent.seeding() and self.root.stopped):
+                    while not (self.root.stopped and self.root.torrent.seeding_or_stopped()):
                         try:
                             percentage = int(round((self.root.torrent.get_file_progress(self.index) /
                                                     self.file.size) * 100))
@@ -254,7 +254,7 @@ class GUI:
 
         def track_progress(self):
             Thread(target=self.check_metadata, daemon=True).start()
-            while not (self.torrent.seeding() and self.stopped):
+            while not (self.stopped and self.torrent.seeding_or_stopped()):
                 status = self.torrent.handle.status()
                 if not self.stopped:
                     self.update_progress_bar(status)
@@ -511,6 +511,11 @@ class GUI:
                 showerror('Error', 'Invalid torrent file.')
         window.destroy()
 
+    def track_node_count(self):
+        while True:
+            self.dht_lbl['text'] = f'DHT node count: {self.session.dht_node_count()}'
+            time.sleep(1)
+
     def __init__(self):
         self.db = DB()
         self.save_path = self.db.get_save_path()
@@ -591,9 +596,16 @@ class GUI:
         self.next_btn.pack(side=RIGHT, padx=5)
 
         label_frame = LabelFrame(self.root, text='Downloads')
-        label_frame.pack(fill=BOTH, expand=True, padx=5, pady=10)
+        label_frame.pack(fill=BOTH, padx=5, pady=5)
         self.download_frame = ScrollableFrame(label_frame)
         self.download_frame.pack(fill=BOTH)
+
+        self.dht_frame = Frame(self.root)
+        self.dht_frame.pack(padx=5, fill=X)
+        self.dht_lbl = Label(self.dht_frame, text="DHT Nodes: ")
+        self.dht_lbl.pack(pady=10)
+
+        Thread(target=self.track_node_count, daemon=True).start()
 
         self.menu = Menu(self.root)
         self.root.config(menu=self.menu)
@@ -618,7 +630,7 @@ class GUI:
 
         self.root.attributes('-alpha', 0.95)
         self.root.title("Torrent App")
-        self.root.geometry("1000x575")
+        self.root.geometry("1000x660")
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.on_exit)
         self.root.mainloop()
