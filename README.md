@@ -16,7 +16,7 @@ and will resume when the app is started again.
    $ bash scripts/setup.sh
    ```
 
-## PostgreSQL SETUP
+### PostgreSQL SETUP
 1. Open terminal in project directory.
 2. Set the PostgreSQL superuser password
    ```
@@ -34,9 +34,15 @@ and will resume when the app is started again.
    Where _\<username\>_ and _\<password\>_ are compulsory parameters that correspond to your PostgreSQL superuser's username 
    and password.
 
-## RUN APP
-   ```
-   $ python3 main.py
-   ```
+## STEPS TO RUN APPLICATION
+1. Open terminal in the project directory
+2. Activate virtual environment
+    ```
+    $ . venv/bin/activate
+    ```
+3. Run app.py
+    ```
+    $ python3 main.py
+    ```
 
 * Download a torrent in the search results by double-clicking on it.
