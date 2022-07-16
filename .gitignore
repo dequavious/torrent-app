@@ -1,0 +1,7 @@
+trackers.txt
+torrents
+venv
+__pycache__
+.idea
+*.iml
+.DS_Store
