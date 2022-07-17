@@ -149,11 +149,14 @@ class GUI:
                     self.window.destroy()
 
             def check_stopped(self):
-                while True:
-                    if self.parent.stopped:
-                        self.window.destroy()
-                        break
-                    time.sleep(1)
+                try:
+                    while True:
+                        if self.parent.stopped:
+                            self.window.destroy()
+                            break
+                        time.sleep(1)
+                except TclError:
+                    pass
 
             def __init__(self, parent):
                 self.parent = parent
