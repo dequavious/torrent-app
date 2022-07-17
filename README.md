@@ -7,7 +7,7 @@ adding trackers, enabling sequential downloads, setting upload/download limits, 
 are saved upon exit along with their settings and resume when the app is started again.
 ## Requirements
 1. Open terminal in project directory.
-2. Install all system requirements and install all required python packages:
+2. Install all system requirements and required python packages:
    ```
    $ bash scripts/install.sh
    ```
