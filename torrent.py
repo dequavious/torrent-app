@@ -1,4 +1,5 @@
 import time
+from threading import Thread
 
 import libtorrent as lt
 from urllib.parse import quote
@@ -98,6 +99,14 @@ class Torrent:
         for priority in priorities:
             self.set_file_priority(priority[0], priority[1])
 
+    def move_to_top(self):
+        try:
+            while self.handle.status().state == lt.torrent_status.downloading_metadata:
+                self.handle.queue_position_up()
+                time.sleep(1)
+        except RuntimeError:
+            return True
+
     def __init__(self, session, name, handle, info, magnet_link, filepath, upload=None, download=None, sequential=False,
                  priorities=None):
         self.state = ['queued', 'checking', 'fetching meta-info', 'downloading', 'finished', 'seeding', 'allocating',
@@ -120,3 +129,5 @@ class Torrent:
         self.sequential = sequential
         if sequential:
             self.handle.set_sequential_download(True)
+
+        Thread(target=self.move_to_top, daemon=True).start()
