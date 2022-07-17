@@ -95,9 +95,9 @@ class DB:
                     f"INSERT INTO torrents(id, name, magnet_link, filepath, upload_limit, download_limit, sequential) "
                     f"VALUES({self.id}, '{torrent_name}', NULL, '{filepath}', {upload_limit}, {download_limit}, "
                     f"{sequential});"))
-            for i, priority in enumerate(priorities):
-                self.cur.execute(sql.SQL(f"INSERT INTO priorities(tid, fid, priority) "
-                                         f"VALUES({self.id}, {i}, {priority});"))
+        for i, priority in enumerate(priorities):
+            self.cur.execute(sql.SQL(f"INSERT INTO priorities(tid, fid, priority) "
+                                     f"VALUES({self.id}, {i}, {priority});"))
 
     def __init__(self):
         self.id = 0
