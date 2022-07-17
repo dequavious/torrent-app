@@ -71,8 +71,11 @@ class Session:
         self.session = lt.session()
         self.session.listen_on(6881, 6891)
 
-        self.session.apply_settings({'dht_restrict_routing_ips': False})
+        self.session.apply_settings({'active_seeds': -1})
+        self.session.apply_settings({'active_checking': -1})
+        self.session.apply_settings({'active_downloads': -1})
         self.session.apply_settings({'dht_restrict_search_ips': False})
+        self.session.apply_settings({'dht_restrict_routing_ips': False})
 
         self.session.add_dht_node(("router.utorrent.com", 6881))
         self.session.add_dht_node(("router.bittorrent.com", 6881))
