@@ -127,21 +127,25 @@ class GUI:
             def set_upload_limit(self):
                 if self.upload_var.get() == 1:
                     self.parent.torrent.set_upload_limit(-1)
-                    showinfo('Info', 'The upload limit for this torrent has been set successfully.')
+                    showinfo('Info', 'The upload limit for this torrent has been set successfully.',
+                             parent=self.window)
                     self.window.destroy()
                 elif self.upload_entry.get().isdigit():
                     self.parent.torrent.set_upload_limit(int(self.upload_entry.get()) * 1000)
-                    showinfo('Info', 'The upload limit for this torrent has been set successfully.')
+                    showinfo('Info', 'The upload limit for this torrent has been set successfully.',
+                             parent=self.window)
                     self.window.destroy()
 
             def set_download_limit(self):
                 if self.download_var.get() == 1:
                     self.parent.torrent.set_download_limit(-1)
-                    showinfo('Info', 'The download limit for this torrent has been set successfully.')
+                    showinfo('Info', 'The download limit for this torrent has been set successfully.',
+                             parent=self.window)
                     self.window.destroy()
                 elif self.download_entry.get().isdigit():
                     self.parent.torrent.set_download_limit(int(self.download_entry.get()) * 1000)
-                    showinfo('Info', 'The download limit for this torrent has been set successfully.')
+                    showinfo('Info', 'The download limit for this torrent has been set successfully.',
+                             parent=self.window)
                     self.window.destroy()
 
             def __init__(self, parent):
@@ -438,7 +442,8 @@ class GUI:
             if directory:
                 self.folder_lbl.__setitem__('text', directory)
                 self.parent.change_save_directory(directory)
-                showinfo('Info', 'The download directory has been changed successfully')
+                showinfo('Info', 'The download directory has been changed successfully',
+                         parent=self.window)
                 self.window.destroy()
 
         def enable_disable_upload(self):
@@ -458,21 +463,25 @@ class GUI:
         def set_upload_limit(self):
             if self.upload_var.get() == 1:
                 self.parent.set_upload_limit(0)
-                showinfo('Info', 'The global upload rate limit has been set successfully.')
+                showinfo('Info', 'The global upload rate limit has been set successfully.',
+                         parent=self.window)
                 self.window.destroy()
             elif self.upload_entry.get().isdigit():
                 self.parent.set_upload_limit(int(self.upload_entry.get()) * 1000)
-                showinfo('Info', 'The global upload rate limit has been set successfully.')
+                showinfo('Info', 'The global upload rate limit has been set successfully.',
+                         parent=self.window)
                 self.window.destroy()
 
         def set_download_limit(self):
             if self.download_var.get() == 1:
                 self.parent.set_download_limit(0)
-                showinfo('Info', 'The global download rate limit has been set successfully.')
+                showinfo('Info', 'The global download rate limit has been set successfully.',
+                         parent=self.window)
                 self.window.destroy()
             elif self.download_entry.get().isdigit():
                 self.parent.set_download_limit(int(self.download_entry.get()) * 1000)
-                showinfo('Info', 'The global download rate limit has been set successfully.')
+                showinfo('Info', 'The global download rate limit has been set successfully.',
+                         parent=self.window)
                 self.window.destroy()
 
         def __init__(self, parent):
@@ -635,26 +644,17 @@ class GUI:
     def resume_previous_downloads(self):
         rows = self.db.get_torrents()
         for i, row in enumerate(rows):
-            sequential = self.db.get_sequential(i + 1)
             priorities = self.db.get_priorities(i + 1)
-            limits = self.db.get_torrent_limits(i + 1)
             if row[1] is not None:
-                if len(sequential) >= 1:
-                    torrent = self.session.add_magnet(row[1], torrent_name=row[0], priorities=priorities, limits=limits,
-                                                      sequential=True)
-                else:
-                    torrent = self.session.add_magnet(row[1], torrent_name=row[0], priorities=priorities, limits=limits)
+                torrent = self.session.add_magnet(row[1], torrent_name=row[0], upload=row[3], download=row[4],
+                                                  sequential=row[5], priorities=priorities)
                 if torrent is not None:
                     Thread(target=self.start_download, daemon=True, args=(torrent, i)).start()
                 else:
                     showerror('Error', 'Invalid magnet link.')
             else:
-                if len(sequential) >= 1:
-                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], priorities=priorities,
-                                                            limits=limits, sequential=True)
-                else:
-                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], priorities=priorities,
-                                                            limits=limits)
+                torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], upload=row[3], download=row[4],
+                                                        sequential=row[5], priorities=priorities)
                 if torrent is not None:
                     Thread(target=self.start_download, daemon=True, args=(torrent, i)).start()
                 else:

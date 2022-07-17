@@ -10,7 +10,6 @@ class Torrent:
             while not self.handle.has_metadata():
                 time.sleep(1)
             self.info = self.handle.get_torrent_info()
-            self.handle.auto_managed(False)
         except RuntimeError:
             pass
 
@@ -19,9 +18,11 @@ class Torrent:
 
     def resume(self):
         self.handle.resume()
+        self.handle.auto_managed(True)
 
     def pause(self):
         self.handle.pause()
+        self.handle.auto_managed(False)
 
     def seeding_or_stopped(self):
         try:
@@ -97,8 +98,8 @@ class Torrent:
         for priority in priorities:
             self.set_file_priority(priority[0], priority[1])
 
-    def __init__(self, session, name, handle, info, magnet_link, filepath, priorities=None, limits=None,
-                 sequential=False):
+    def __init__(self, session, name, handle, info, magnet_link, filepath, upload=None, download=None, sequential=False,
+                 priorities=None):
         self.state = ['queued', 'checking', 'fetching meta-info', 'downloading', 'finished', 'seeding', 'allocating',
                       'checking resume data']
         self.session = session
@@ -111,11 +112,10 @@ class Torrent:
         if priorities is not None:
             self.set_priorities(priorities)
 
-        if limits is not None:
-            if limits[0] is not None:
-                self.set_upload_limit(limits[0])
-            if limits[1] is not None:
-                self.set_download_limit(limits[1])
+        if upload is not None:
+            self.set_upload_limit(upload)
+        if download is not None:
+            self.set_download_limit(download)
 
         self.sequential = sequential
         if sequential:

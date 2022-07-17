@@ -29,7 +29,7 @@ class Session:
     def get_download_limit(self):
         return self.session.download_rate_limit()
 
-    def add_magnet(self, magnet_link, torrent_name=None, priorities=None, limits=None, sequential=False):
+    def add_magnet(self, magnet_link, torrent_name=None, upload=None, download=None, sequential=False, priorities=None):
         if not magnet_link:
             raise ValueError("no magnet link provided!")
 
@@ -37,15 +37,15 @@ class Session:
             handle = lt.add_magnet_uri(self.session, magnet_link, {'save_path': self.save_path,
                                                                    'storage_mode': lt.storage_mode_t(2)})
             if torrent_name is not None:
-                return Torrent(self.session, torrent_name, handle, None, magnet_link, None, priorities=priorities,
-                               limits=limits, sequential=sequential)
+                return Torrent(self.session, torrent_name, handle, None, magnet_link, None, upload=upload,
+                               download=download, sequential=sequential, priorities=priorities)
             else:
-                return Torrent(self.session, handle.name(), handle, None, magnet_link, None, priorities=priorities,
-                               limits=limits, sequential=sequential)
+                return Torrent(self.session, handle.name(), handle, None, magnet_link, None, upload=upload,
+                               download=download, sequential=sequential, priorities=priorities)
         except RuntimeError:
             return None
 
-    def add_torrent_file(self, filepath, torrent_name, priorities=None, limits=None, sequential=False):
+    def add_torrent_file(self, filepath, torrent_name, upload=None, download=None, sequential=False, priorities=None):
         if not os.path.isdir('torrents'):
             os.makedirs('torrents')
 
@@ -56,8 +56,8 @@ class Session:
 
         try:
             handle = self.session.add_torrent({'ti': lt.torrent_info(path), 'save_path': f'{self.save_path}'})
-            return Torrent(self.session, torrent_name, handle, lt.torrent_info(path), None, path, priorities=priorities,
-                           limits=limits, sequential=sequential)
+            return Torrent(self.session, torrent_name, handle, lt.torrent_info(path), None, path, upload=upload,
+                           download=download, sequential=sequential, priorities=priorities)
         except RuntimeError:
             return None
 
