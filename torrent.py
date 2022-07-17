@@ -1,6 +1,7 @@
 import time
 
 import libtorrent as lt
+from urllib.parse import quote
 
 
 class Torrent:
@@ -10,8 +11,6 @@ class Torrent:
                 time.sleep(1)
             self.info = self.handle.get_torrent_info()
             self.handle.auto_managed(False)
-            self.handle.stop_when_ready(True)
-            self.handle.resume()
         except RuntimeError:
             pass
 
@@ -74,7 +73,9 @@ class Torrent:
         if self.magnet_link is not None:
             for tracker in trackers:
                 self.info.add_tracker(tracker)
-                self.magnet_link += f'&tr={tracker}'
+                encoded_url = quote(tracker, safe='')
+                if not self.magnet_link.__contains__(encoded_url):
+                    self.magnet_link += f'&tr={tracker}'
         else:
             decoded_data = lt.bdecode(open(self.filepath, 'rb').read())
             for tracker in trackers:
