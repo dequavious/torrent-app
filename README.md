@@ -1,4 +1,4 @@
-# TORRENT CLIENT APPLICATION
+# TORRENT APPLICATION
 A torrenting application that scrapes the search results of https://www.1377x.to/ and displays the name, seeds, leeches and size for each 
 torrent. Users are able to page through the search results and can start a download by double-clicking on the 
 torrent they want. Users are also able to start a torrent download manually by uploading a ".torrent" file or by pasting 
