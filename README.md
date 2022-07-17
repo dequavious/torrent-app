@@ -29,7 +29,7 @@ are saved upon exit along with their settings and resume when the app is started
 
 3. To create the database to store all relevant torrent info use:
     ```
-    $ python3 setupdb.py <username> <password>
+    $ python3 database/setupdb.py <username> <password>
     ```
    Where _\<username\>_ and _\<password\>_ are compulsory parameters that correspond to your PostgreSQL superuser's username 
    and password.
