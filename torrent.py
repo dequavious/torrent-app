@@ -73,7 +73,7 @@ class Torrent:
     def add_trackers(self, trackers):
         if self.magnet_link is not None:
             for tracker in trackers:
-                self.info.add_trackers(tracker)
+                self.info.add_tracker(tracker)
                 self.magnet_link += f'&tr={tracker}'
         else:
             decoded_data = lt.bdecode(open(self.filepath, 'rb').read())

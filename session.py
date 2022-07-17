@@ -81,12 +81,12 @@ class Session:
         self.session.add_dht_node(('dht.transmission.com', 6881))
         self.session.add_dht_node(("dht.aelitis.com", 6881))
 
-        # self.session.add_dht_router("router.utorrent.com", 6881)
-        # self.session.add_dht_router("router.bittorrent.com", 6881)
-        # self.session.add_dht_router("router.bitcomet.com", 6881)
-        # self.session.add_dht_router("dht.transmissionbt.com", 6881)
-        # self.session.add_dht_router('dht.transmission.com', 6881)
-        # self.session.add_dht_router("dht.aelitis.com", 6881)
+        self.session.add_dht_router("router.utorrent.com", 6881)
+        self.session.add_dht_router("router.bittorrent.com", 6881)
+        self.session.add_dht_router("router.bitcomet.com", 6881)
+        self.session.add_dht_router("dht.transmissionbt.com", 6881)
+        self.session.add_dht_router('dht.transmission.com', 6881)
+        self.session.add_dht_router("dht.aelitis.com", 6881)
 
         if not os.path.isdir(f'{save_path}'):
             os.makedirs(f'{save_path}')
