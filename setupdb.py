@@ -42,6 +42,15 @@ if __name__ == "__main__":
                         ');'
                         ))
     cur.execute(sql.SQL("INSERT INTO save_path(directory) VALUES('downloads');"))
+    cur.execute(sql.SQL('DROP TABLE IF EXISTS global_limits;\n'
+                        'CREATE TABLE IF NOT EXISTS global_limits\n'
+                        '(\n'
+                        '"id" SERIAL PRIMARY KEY NOT NULL,\n'
+                        '"upload_limit" INTEGER,\n'
+                        '"download_limit" INTEGER\n'
+                        ');'
+                        ))
+    cur.execute(sql.SQL("INSERT INTO global_limits(upload_limit, download_limit) VALUES(NULL, NULL);"))
     cur.execute(sql.SQL('DROP TABLE IF EXISTS torrents CASCADE;\n'
                         'CREATE TABLE IF NOT EXISTS torrents\n'
                         '(\n'
@@ -91,6 +100,18 @@ if __name__ == "__main__":
                         '"id" SERIAL PRIMARY KEY NOT NULL,\n'
                         '"tid" INTEGER NOT NULL,\n'
                         'CONSTRAINT fk_seq'
+                        '   FOREIGN KEY(tid)'
+                        '       REFERENCES torrents(id)'
+                        ');'
+                        ))
+    cur.execute(sql.SQL('DROP TABLE IF EXISTS torrent_limits;\n'
+                        'CREATE TABLE IF NOT EXISTS torrent_limits\n'
+                        '(\n'
+                        '"id" SERIAL PRIMARY KEY NOT NULL,\n'
+                        '"tid" INTEGER NOT NULL,\n'
+                        '"upload_limit" INTEGER,\n'
+                        '"download_limit" INTEGER,\n'
+                        'CONSTRAINT fk_lim'
                         '   FOREIGN KEY(tid)'
                         '       REFERENCES torrents(id)'
                         ');'

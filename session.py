@@ -1,8 +1,6 @@
 import os
 import shutil
-import time
 from shutil import SameFileError
-from threading import Thread
 
 import libtorrent as lt
 
@@ -15,13 +13,23 @@ class Session:
 
     def start(self):
         self.session.start_dht()
-        self.session.start_lsd()
 
     def stop(self):
         self.session.stop_dht()
-        self.session.stop_lsd()
 
-    def add_magnet(self, magnet_link, torrent_name=None, priorities=None, sequential=False):
+    def set_upload_limit(self, limit):
+        self.session.set_upload_rate_limit(limit)
+
+    def set_download_limit(self, limit):
+        self.session.set_download_rate_limit(limit)
+
+    def get_upload_limit(self):
+        return self.session.upload_rate_limit()
+
+    def get_download_limit(self):
+        return self.session.download_rate_limit()
+
+    def add_magnet(self, magnet_link, torrent_name=None, priorities=None, limits=None, sequential=False):
         if not magnet_link:
             raise ValueError("no magnet link provided!")
 
@@ -29,13 +37,15 @@ class Session:
             handle = lt.add_magnet_uri(self.session, magnet_link, {'save_path': self.save_path,
                                                                    'storage_mode': lt.storage_mode_t(2)})
             if torrent_name is not None:
-                return Torrent(self.session, torrent_name, handle, None, magnet_link, None, priorities, sequential)
+                return Torrent(self.session, torrent_name, handle, None, magnet_link, None, priorities=priorities,
+                               limits=limits, sequential=sequential)
             else:
-                return Torrent(self.session, handle.name(), handle, None, magnet_link, None, priorities, sequential)
+                return Torrent(self.session, handle.name(), handle, None, magnet_link, None, priorities=priorities,
+                               limits=limits, sequential=sequential)
         except RuntimeError:
             return None
 
-    def add_torrent_file(self, filepath, torrent_name, priorities=None, sequential=False):
+    def add_torrent_file(self, filepath, torrent_name, priorities=None, limits=None, sequential=False):
         if not os.path.isdir('torrents'):
             os.makedirs('torrents')
 
@@ -46,27 +56,43 @@ class Session:
 
         try:
             handle = self.session.add_torrent({'ti': lt.torrent_info(path), 'save_path': f'{self.save_path}'})
-            return Torrent(self.session, torrent_name, handle, lt.torrent_info(path), None, path, priorities, sequential)
+            return Torrent(self.session, torrent_name, handle, lt.torrent_info(path), None, path, priorities=priorities,
+                           limits=limits, sequential=sequential)
         except RuntimeError:
             return None
 
     def change_save_directory(self, directory):
         self.save_path = directory
 
-    def __init__(self, save_path):
+    def __init__(self, save_path, limits):
         self.id = 0
         self.torrents = {}
         self.save_path = save_path
         self.session = lt.session()
         self.session.listen_on(6881, 6891)
+
         self.session.apply_settings({'dht_restrict_routing_ips': False})
         self.session.apply_settings({'dht_restrict_search_ips': False})
-        self.session.add_dht_router("router.utorrent.com", 6881)
-        self.session.add_dht_router("router.bittorrent.com", 6881)
-        self.session.add_dht_router("router.bitcomet.com", 6881)
-        self.session.add_dht_router("dht.transmissionbt.com", 6881)
-        self.session.add_dht_router('dht.transmission.com', 6881)
-        self.session.add_dht_router("dht.aelitis.com", 6881)
+
+        self.session.add_dht_node(("router.utorrent.com", 6881))
+        self.session.add_dht_node(("router.bittorrent.com", 6881))
+        self.session.add_dht_node(("router.bitcomet.com", 6881))
+        self.session.add_dht_node(("dht.transmissionbt.com", 6881))
+        self.session.add_dht_node(('dht.transmission.com', 6881))
+        self.session.add_dht_node(("dht.aelitis.com", 6881))
+
+        # self.session.add_dht_router("router.utorrent.com", 6881)
+        # self.session.add_dht_router("router.bittorrent.com", 6881)
+        # self.session.add_dht_router("router.bitcomet.com", 6881)
+        # self.session.add_dht_router("dht.transmissionbt.com", 6881)
+        # self.session.add_dht_router('dht.transmission.com', 6881)
+        # self.session.add_dht_router("dht.aelitis.com", 6881)
 
         if not os.path.isdir(f'{save_path}'):
             os.makedirs(f'{save_path}')
+
+        if limits[0] is not None:
+            self.set_upload_limit(limits[0])
+
+        if limits[1] is not None:
+            self.set_download_limit(limits[1])

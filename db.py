@@ -58,6 +58,32 @@ class DB:
                                  '       REFERENCES torrents(id)'
                                  ');'
                                  ))
+        self.cur.execute(sql.SQL('DROP TABLE IF EXISTS torrent_limits;\n'
+                                 'CREATE TABLE IF NOT EXISTS torrent_limits\n'
+                                 '(\n'
+                                 '"id" SERIAL PRIMARY KEY NOT NULL,\n'
+                                 '"tid" INTEGER NOT NULL,\n'
+                                 '"upload_limit" INTEGER,\n'
+                                 '"download_limit" INTEGER,\n'
+                                 'CONSTRAINT fk_lim'
+                                 '   FOREIGN KEY(tid)'
+                                 '       REFERENCES torrents(id)'
+                                 ');'
+                                 ))
+
+    def get_global_limits(self):
+        self.cur.execute(sql.SQL("SELECT upload_limit, download_limit FROM global_limits WHERE id = 1;"))
+        return self.cur.fetchall()[0]
+
+    def get_torrent_limits(self, torrent_id):
+        self.cur.execute(sql.SQL(f"SELECT upload_limit, download_limit FROM torrent_limits WHERE tid = {torrent_id};"))
+        return self.cur.fetchall()[0]
+
+    def set_global_upload_limit(self, limit):
+        self.cur.execute(sql.SQL(f"UPDATE global_limits SET upload_limit = {limit} WHERE id = 1;"))
+
+    def set_global_download_limit(self, limit):
+        self.cur.execute(sql.SQL(f"UPDATE global_limits SET download_limit = {limit} WHERE id = 1;"))
 
     def get_torrents(self):
         self.cur.execute(sql.SQL("SELECT name, magnet_link, filepath, m.tid, f.tid "
@@ -80,7 +106,7 @@ class DB:
     def update_save_path(self, new_directory):
         self.cur.execute(sql.SQL(f"UPDATE save_path SET directory = '{new_directory}' WHERE id = 1;"))
 
-    def save(self, torrent_name, torrent_magnet, filepath, priorities, sequential=False):
+    def save(self, torrent_name, torrent_magnet, filepath, priorities, sequential, upload_limit, download_limit):
         self.id += 1
         if torrent_magnet is not None:
             self.cur.execute(sql.SQL(f"INSERT INTO torrents(id, name, type) "
@@ -95,6 +121,19 @@ class DB:
                                      f"VALUES({self.id}, {i}, {priority});"))
         if sequential:
             self.cur.execute(sql.SQL(f"INSERT INTO sequential(tid) VALUES({self.id});"))
+
+        if (upload_limit == -1 or upload_limit == 0) and (download_limit == -1 or download_limit == 0):
+            self.cur.execute(sql.SQL(f"INSERT INTO torrent_limits(tid, upload_limit, download_limit) "
+                                     f"VALUES({self.id}, NULL, NULL);"))
+        elif upload_limit == -1 or upload_limit == 0:
+            self.cur.execute(sql.SQL(f"INSERT INTO torrent_limits(tid, upload_limit, download_limit) "
+                                     f"VALUES({self.id}, NULL, {download_limit});"))
+        elif download_limit == -1 or download_limit == 0:
+            self.cur.execute(sql.SQL(f"INSERT INTO torrent_limits(tid, upload_limit, download_limit) "
+                                     f"VALUES({self.id}, {upload_limit}, NULL);"))
+        else:
+            self.cur.execute(sql.SQL(f"INSERT INTO torrent_limits(tid, upload_limit, download_limit) "
+                                     f"VALUES({self.id}, {upload_limit}, {download_limit});"))
 
     def __init__(self):
         self.id = 0

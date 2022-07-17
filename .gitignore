@@ -3,5 +3,6 @@ torrents
 venv
 __pycache__
 .idea
+downloads
 *.iml
 .DS_Store

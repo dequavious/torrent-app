@@ -110,6 +110,40 @@ class GUI:
                     self.parent.torrent.set_sequential_download(False)
                     showinfo('Info', 'Sequential downloading has been disabled for this torrent.', parent=self.window)
 
+            def enable_disable_upload(self):
+                self.upload_var.set(1 - self.upload_var.get())
+                if self.upload_var.get() == 1:
+                    self.upload_entry['state'] = 'disabled'
+                else:
+                    self.upload_entry['state'] = 'normal'
+
+            def enable_disable_download(self):
+                self.download_var.set(1 - self.download_var.get())
+                if self.download_var.get() == 1:
+                    self.download_entry['state'] = 'disabled'
+                else:
+                    self.download_entry['state'] = 'normal'
+
+            def set_upload_limit(self):
+                if self.upload_var.get() == 1:
+                    self.parent.torrent.set_upload_limit(-1)
+                    showinfo('Info', 'The upload limit for this torrent has been set successfully.')
+                    self.window.destroy()
+                elif self.upload_entry.get().isdigit():
+                    self.parent.torrent.set_upload_limit(int(self.upload_entry.get()) * 1000)
+                    showinfo('Info', 'The upload limit for this torrent has been set successfully.')
+                    self.window.destroy()
+
+            def set_download_limit(self):
+                if self.download_var.get() == 1:
+                    self.parent.torrent.set_download_limit(-1)
+                    showinfo('Info', 'The download limit for this torrent has been set successfully.')
+                    self.window.destroy()
+                elif self.download_entry.get().isdigit():
+                    self.parent.torrent.set_download_limit(int(self.download_entry.get()) * 1000)
+                    showinfo('Info', 'The download limit for this torrent has been set successfully.')
+                    self.window.destroy()
+
             def __init__(self, parent):
                 self.parent = parent
 
@@ -224,6 +258,50 @@ class GUI:
                     self.sequential_lbl = Label(label_frame, text='Disabled')
                     self.sequential_lbl.pack(side=LEFT, padx=10, pady=10)
 
+                if self.parent.torrent.get_upload_limit() == -1 or self.parent.torrent.get_upload_limit() == 0:
+                    upload_frame = LabelFrame(general_tab, text='Upload rate limit: None')
+                else:
+                    upload_limit = int(round(self.parent.torrent.get_upload_limit() / 1000))
+                    upload_frame = LabelFrame(general_tab, text=f'Upload rate limit: {upload_limit} kb/s')
+                upload_frame.pack(padx=10, pady=10, fill=BOTH)
+                self.upload_var = IntVar(value=1)
+                upload_check_btn = Checkbutton(upload_frame, variable=self.upload_var, text='None',
+                                               command=self.enable_disable_upload)
+                upload_check_btn.pack(side=LEFT, padx=10, pady=10)
+                upload_check_btn.select()
+                self.upload_entry = Entry(upload_frame, state='disabled')
+                self.upload_entry.pack(side=LEFT, padx=10, pady=10)
+                upload_lbl = Label(upload_frame, text='kb/s')
+                upload_lbl.pack(side=LEFT, pady=10)
+                Button(upload_frame,
+                       text='Update',
+                       command=self.set_upload_limit,
+                       bg='#081947',
+                       fg='#fff',
+                       ).pack(side=LEFT, padx=10, pady=10)
+
+                if self.parent.torrent.get_download_limit() == -1 or self.parent.torrent.get_download_limit() == 0:
+                    download_frame = LabelFrame(general_tab, text='Download rate limit: None')
+                else:
+                    download_limit = int(round(self.parent.torrent.get_download_limit() / 1000))
+                    download_frame = LabelFrame(general_tab, text=f'Download rate limit: {download_limit} kb/s')
+                download_frame.pack(padx=10, pady=10, fill=BOTH)
+                self.download_var = IntVar(value=1)
+                download_check_btn = Checkbutton(download_frame, variable=self.download_var, text='None',
+                                                 command=self.enable_disable_download)
+                download_check_btn.pack(side=LEFT, padx=10, pady=10)
+                download_check_btn.select()
+                self.download_entry = Entry(download_frame, state='disabled')
+                self.download_entry.pack(side=LEFT, padx=10, pady=10)
+                download_lbl = Label(download_frame, text='kb/s')
+                download_lbl.pack(side=LEFT, pady=10)
+                Button(download_frame,
+                       text='Update',
+                       command=self.set_download_limit,
+                       bg='#081947',
+                       fg='#fff',
+                       ).pack(side=LEFT, padx=10, pady=10)
+
                 self.window.mainloop()
 
         def update_progress_bar(self, status):
@@ -235,16 +313,16 @@ class GUI:
                         if not self.stopped:
                             self.style.configure(f'{self.pid}.text.Horizontal.TProgressbar',
                                                  text=f'{int(round(percentage))} % complete (download: '
-                                                      f'{round(status.download_rate / 1000, 1)} kb/s upload: '
-                                                      f'{round(status.upload_rate / 1000, 1)} kb/s peers: '
+                                                      f'{int(round(status.download_rate / 1000))} kb/s upload: '
+                                                      f'{int(round(status.upload_rate / 1000))} kb/s peers: '
                                                       f'{status.num_peers}) '
                                                       'paused ')
                     else:
                         if not self.stopped:
                             self.style.configure(f'{self.pid}.text.Horizontal.TProgressbar',
                                                  text=f'{int(round(percentage))} % complete (download: '
-                                                      f'{round(status.download_rate / 1000, 1)} kb/s upload: '
-                                                      f'{round(status.upload_rate / 1000, 1)} kb/s peers: '
+                                                      f'{int(round(status.download_rate / 1000))} kb/s upload: '
+                                                      f'{int(round(status.upload_rate / 1000))} kb/s peers: '
                                                       f'{status.num_peers}) '
                                                       f'{self.torrent.state[status.state]} ')
                     if not self.stopped:
@@ -328,7 +406,7 @@ class GUI:
                 torrent = self.parent.session.add_magnet(self.text.get('1.0', 'end-1c'))
                 if torrent is not None:
                     if not self.parent.torrents.get(f"{torrent.handle.name()}"):
-                        Thread(target=self.parent.start_download, daemon=True, args=(torrent, )).start()
+                        Thread(target=self.parent.start_download, daemon=True, args=(torrent,)).start()
                     else:
                         showerror('Error', 'Duplicate torrent.')
                     self.window.destroy()
@@ -358,26 +436,102 @@ class GUI:
         def change_directory(self):
             directory = askdirectory(parent=self.window, title='Select directory')
             if directory:
-                self.label.__setitem__('text', directory)
+                self.folder_lbl.__setitem__('text', directory)
                 self.parent.change_save_directory(directory)
                 showinfo('Info', 'The download directory has been changed successfully')
                 self.window.destroy()
 
+        def enable_disable_upload(self):
+            self.upload_var.set(1 - self.upload_var.get())
+            if self.upload_var.get() == 1:
+                self.upload_entry['state'] = 'disabled'
+            else:
+                self.upload_entry['state'] = 'normal'
+
+        def enable_disable_download(self):
+            self.download_var.set(1 - self.download_var.get())
+            if self.download_var.get() == 1:
+                self.download_entry['state'] = 'disabled'
+            else:
+                self.download_entry['state'] = 'normal'
+
+        def set_upload_limit(self):
+            if self.upload_var.get() == 1:
+                self.parent.set_upload_limit(0)
+                showinfo('Info', 'The global upload rate limit has been set successfully.')
+                self.window.destroy()
+            elif self.upload_entry.get().isdigit():
+                self.parent.set_upload_limit(int(self.upload_entry.get()) * 1000)
+                showinfo('Info', 'The global upload rate limit has been set successfully.')
+                self.window.destroy()
+
+        def set_download_limit(self):
+            if self.download_var.get() == 1:
+                self.parent.set_download_limit(0)
+                showinfo('Info', 'The global download rate limit has been set successfully.')
+                self.window.destroy()
+            elif self.download_entry.get().isdigit():
+                self.parent.set_download_limit(int(self.download_entry.get()) * 1000)
+                showinfo('Info', 'The global download rate limit has been set successfully.')
+                self.window.destroy()
+
         def __init__(self, parent):
             self.parent = parent
-            self.save_path = self.parent.save_path
             self.window = Tk()
-            self.label_frame = LabelFrame(self.window, text='Downloads folder')
-            self.label_frame.pack(padx=10, pady=10, fill=BOTH)
-            self.label = Label(self.label_frame, text=self.save_path)
-            self.label.pack(side=LEFT, padx=10, pady=10)
-            self.button = Button(self.label_frame,
-                                 text='Update',
-                                 command=self.change_directory,
-                                 bg='#081947',
-                                 fg='#fff',
-                                 )
-            self.button.pack(side=RIGHT, padx=10, pady=10)
+            folder_frame = LabelFrame(self.window, text='Downloads folder')
+            folder_frame.pack(padx=10, pady=10, fill=BOTH)
+            self.folder_lbl = Label(folder_frame, text=parent.save_path)
+            self.folder_lbl.pack(side=LEFT, padx=10, pady=10)
+            Button(folder_frame,
+                   text='Update',
+                   command=self.change_directory,
+                   bg='#081947',
+                   fg='#fff',
+                   ).pack(side=RIGHT, padx=10, pady=10)
+
+            if self.parent.get_upload_limit() == 0:
+                upload_frame = LabelFrame(self.window, text='Upload rate limit: None')
+            else:
+                upload_limit = int(round(self.parent.get_upload_limit() / 1000))
+                upload_frame = LabelFrame(self.window, text=f'Upload rate limit: {upload_limit} kb/s')
+            upload_frame.pack(padx=10, pady=10, fill=BOTH)
+            self.upload_var = IntVar(value=1)
+            upload_check_btn = Checkbutton(upload_frame, variable=self.upload_var, text='None',
+                                           command=self.enable_disable_upload)
+            upload_check_btn.pack(side=LEFT, padx=10, pady=10)
+            upload_check_btn.select()
+            self.upload_entry = Entry(upload_frame, state='disabled')
+            self.upload_entry.pack(side=LEFT, padx=10, pady=10)
+            upload_lbl = Label(upload_frame, text='kb/s')
+            upload_lbl.pack(side=LEFT, pady=10)
+            Button(upload_frame,
+                   text='Update',
+                   command=self.set_upload_limit,
+                   bg='#081947',
+                   fg='#fff',
+                   ).pack(side=RIGHT, padx=10, pady=10)
+
+            if self.parent.get_download_limit() == 0:
+                download_frame = LabelFrame(self.window, text='Download rate limit: None')
+            else:
+                download_limit = int(round(self.parent.get_download_limit() / 1000))
+                download_frame = LabelFrame(self.window, text=f'Download rate limit: {download_limit} kb/s')
+            download_frame.pack(padx=10, pady=10, fill=BOTH)
+            self.download_var = IntVar(value=1)
+            download_check_btn = Checkbutton(download_frame, variable=self.download_var, text='None',
+                                             command=self.enable_disable_download)
+            download_check_btn.pack(side=LEFT, padx=10, pady=10)
+            download_check_btn.select()
+            self.download_entry = Entry(download_frame, state='disabled')
+            self.download_entry.pack(side=LEFT, padx=10, pady=10)
+            download_lbl = Label(download_frame, text='kb/s')
+            download_lbl.pack(side=LEFT, pady=10)
+            Button(download_frame,
+                   text='Update',
+                   command=self.set_download_limit,
+                   bg='#081947',
+                   fg='#fff',
+                   ).pack(side=RIGHT, padx=10, pady=10)
 
             self.window.title("Settings")
             self.window.resizable(False, False)
@@ -387,9 +541,29 @@ class GUI:
             for name, torrent in self.torrents.items():
                 self.session.stop()
                 self.db.save(name, torrent.magnet_link, torrent.filepath, torrent.get_file_priorities(),
-                             torrent.sequential)
+                             torrent.sequential, torrent.get_upload_limit(), torrent.get_download_limit())
             self.root.destroy()
             sys.exit()
+
+    def set_upload_limit(self, limit):
+        self.session.set_upload_limit(limit)
+        if limit == 0:
+            self.db.set_global_upload_limit('NULL')
+        else:
+            self.db.set_global_upload_limit(limit)
+
+    def set_download_limit(self, limit):
+        self.session.set_download_limit(limit)
+        if limit == 0:
+            self.db.set_global_download_limit('NULL')
+        else:
+            self.db.set_global_download_limit(limit)
+
+    def get_upload_limit(self):
+        return self.session.get_upload_limit()
+
+    def get_download_limit(self):
+        return self.session.get_download_limit()
 
     def scrape(self, search, page):
         if search != '':
@@ -436,9 +610,9 @@ class GUI:
             if not self.torrents.get(f"{self.results[int(item)]['name']}"):
                 magnet_link = get_magnet_link(self.results[int(item)]['link'])
                 if magnet_link != '':
-                    torrent = self.session.add_magnet(magnet_link, self.results[int(item)]['name'])
+                    torrent = self.session.add_magnet(magnet_link, torrent_name=self.results[int(item)]['name'])
                     if torrent is not None:
-                        Thread(target=self.start_download, daemon=True, args=(torrent, )).start()
+                        Thread(target=self.start_download, daemon=True, args=(torrent,)).start()
                     else:
                         showerror('Error', 'Invalid magnet link.')
                 else:
@@ -463,28 +637,24 @@ class GUI:
         for i, row in enumerate(rows):
             sequential = self.db.get_sequential(i + 1)
             priorities = self.db.get_priorities(i + 1)
+            limits = self.db.get_torrent_limits(i + 1)
             if row[1] is not None:
-                if len(priorities) >= 1 and len(sequential) >= 1:
-                    torrent = self.session.add_magnet(row[1], row[0], priorities, True)
-                elif len(priorities) >= 1:
-                    torrent = self.session.add_magnet(row[1], row[0], priorities=priorities)
-                elif len(sequential) >= 1:
-                    torrent = self.session.add_magnet(row[1], row[0], sequential=True)
+                if len(sequential) >= 1:
+                    torrent = self.session.add_magnet(row[1], torrent_name=row[0], priorities=priorities, limits=limits,
+                                                      sequential=True)
                 else:
-                    torrent = self.session.add_magnet(row[1], row[0])
+                    torrent = self.session.add_magnet(row[1], torrent_name=row[0], priorities=priorities, limits=limits)
                 if torrent is not None:
                     Thread(target=self.start_download, daemon=True, args=(torrent, i)).start()
                 else:
                     showerror('Error', 'Invalid magnet link.')
             else:
-                if len(priorities) >= 1 and len(sequential) >= 1:
-                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], priorities, True)
-                elif len(priorities) >= 1:
-                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], priorities=priorities)
-                elif len(sequential) >= 1:
-                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], sequential=True)
+                if len(sequential) >= 1:
+                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], priorities=priorities,
+                                                            limits=limits, sequential=True)
                 else:
-                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1])
+                    torrent = self.session.add_torrent_file(row[2], row[2].split('/')[-1], priorities=priorities,
+                                                            limits=limits)
                 if torrent is not None:
                     Thread(target=self.start_download, daemon=True, args=(torrent, i)).start()
                 else:
@@ -504,7 +674,7 @@ class GUI:
             torrent = self.session.add_torrent_file(filepath, filepath.split('/')[-1])
             if torrent is not None:
                 if not self.torrents.get(f"{torrent.name}"):
-                    Thread(target=self.start_download, daemon=True, args=(torrent, )).start()
+                    Thread(target=self.start_download, daemon=True, args=(torrent,)).start()
                 else:
                     showerror('Error', 'Duplicate torrent.')
             else:
@@ -524,7 +694,7 @@ class GUI:
         self.page = 1
         self.torrents = {}
         self.results = None
-        self.session = Session(self.save_path)
+        self.session = Session(self.save_path, self.db.get_global_limits())
         self.session.start()
 
         self.download_count = 0

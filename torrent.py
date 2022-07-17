@@ -9,6 +9,9 @@ class Torrent:
             while not self.handle.has_metadata():
                 time.sleep(1)
             self.info = self.handle.get_torrent_info()
+            self.handle.auto_managed(False)
+            self.handle.stop_when_ready(True)
+            self.handle.resume()
         except RuntimeError:
             pass
 
@@ -52,14 +55,16 @@ class Torrent:
         return trackers
 
     def set_upload_limit(self, limit):
-        while not self.handle.has_metadata:
-            time.sleep(1)
         self.handle.set_upload_limit(limit)
 
     def set_download_limit(self, limit):
-        while not self.handle.has_metadata:
-            time.sleep(1)
         self.handle.set_download_limit(limit)
+
+    def get_upload_limit(self):
+        return self.handle.upload_limit()
+
+    def get_download_limit(self):
+        return self.handle.download_limit()
 
     def set_sequential_download(self, value):
         self.sequential = value
@@ -91,7 +96,8 @@ class Torrent:
         for priority in priorities:
             self.set_file_priority(priority[0], priority[1])
 
-    def __init__(self, session, name, handle, info, magnet_link, filepath, priorities=None, sequential=False):
+    def __init__(self, session, name, handle, info, magnet_link, filepath, priorities=None, limits=None,
+                 sequential=False):
         self.state = ['queued', 'checking', 'fetching meta-info', 'downloading', 'finished', 'seeding', 'allocating',
                       'checking resume data']
         self.session = session
@@ -101,15 +107,15 @@ class Torrent:
         self.magnet_link = magnet_link
         self.filepath = filepath
 
-        self.handle.auto_managed(False)
-        self.handle.stop_when_ready(True)
-        self.handle.queue_position_top()
-        self.handle.resume()
-
         if priorities is not None:
             self.set_priorities(priorities)
+
+        if limits is not None:
+            if limits[0] is not None:
+                self.set_upload_limit(limits[0])
+            if limits[1] is not None:
+                self.set_download_limit(limits[1])
 
         self.sequential = sequential
         if sequential:
             self.handle.set_sequential_download(True)
-
