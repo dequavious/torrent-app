@@ -31,14 +31,14 @@ class DB:
                                  ))
 
     def get_global_limits(self):
-        self.cur.execute(sql.SQL("SELECT upload_limit, download_limit FROM global_limits WHERE id = 1;"))
+        self.cur.execute(sql.SQL("SELECT upload_limit, download_limit FROM settings WHERE id = 1;"))
         return self.cur.fetchall()[0]
 
     def set_global_upload_limit(self, limit):
-        self.cur.execute(sql.SQL(f"UPDATE global_limits SET upload_limit = {limit} WHERE id = 1;"))
+        self.cur.execute(sql.SQL(f"UPDATE settings SET upload_limit = {limit} WHERE id = 1;"))
 
     def set_global_download_limit(self, limit):
-        self.cur.execute(sql.SQL(f"UPDATE global_limits SET download_limit = {limit} WHERE id = 1;"))
+        self.cur.execute(sql.SQL(f"UPDATE settings SET download_limit = {limit} WHERE id = 1;"))
 
     def get_torrents(self):
         self.cur.execute(sql.SQL("SELECT name, magnet_link, filepath, upload_limit, download_limit, sequential "
@@ -50,11 +50,11 @@ class DB:
         return self.cur.fetchall()
 
     def get_save_path(self):
-        self.cur.execute(sql.SQL("SELECT directory FROM save_path WHERE id = 1;"))
+        self.cur.execute(sql.SQL("SELECT save_path FROM settings WHERE id = 1;"))
         return self.cur.fetchall()[0][0]
 
     def update_save_path(self, new_directory):
-        self.cur.execute(sql.SQL(f"UPDATE save_path SET directory = '{new_directory}' WHERE id = 1;"))
+        self.cur.execute(sql.SQL(f"UPDATE settings SET save_path = '{new_directory}' WHERE id = 1;"))
 
     def save(self, torrent_name, torrent_magnet, filepath, priorities, sequential, upload_limit, download_limit):
         self.id += 1

@@ -34,31 +34,17 @@ if __name__ == "__main__":
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
 
-    cur.execute(sql.SQL('DROP TABLE IF EXISTS save_path;\n'
-                        'CREATE TABLE IF NOT EXISTS save_path\n'
+    cur.execute(sql.SQL('DROP TABLE IF EXISTS settings;\n'
+                        'CREATE TABLE IF NOT EXISTS settings\n'
                         '(\n'
                         '"id" SERIAL PRIMARY KEY NOT NULL,\n'
-                        '"directory" text NOT NULL\n'
-                        ');'
-                        ))
-    cur.execute(sql.SQL("INSERT INTO save_path(directory) VALUES('downloads');"))
-    cur.execute(sql.SQL('DROP TABLE IF EXISTS global_limits;\n'
-                        'CREATE TABLE IF NOT EXISTS global_limits\n'
-                        '(\n'
-                        '"id" SERIAL PRIMARY KEY NOT NULL,\n'
+                        '"save_path" text NOT NULL, \n'
                         '"upload_limit" INTEGER,\n'
                         '"download_limit" INTEGER\n'
                         ');'
                         ))
-    cur.execute(sql.SQL("INSERT INTO global_limits(upload_limit, download_limit) VALUES(NULL, NULL);"))
-    cur.execute(sql.SQL('DROP TABLE IF EXISTS torrents CASCADE;\n'
-                        'CREATE TABLE IF NOT EXISTS torrents\n'
-                        '(\n'
-                        '"id" INTEGER PRIMARY KEY NOT NULL,\n'
-                        '"name" text NOT NULL,\n'
-                        '"type" text NOT NULL\n'
-                        ');'
-                        ))
+    cur.execute(sql.SQL("INSERT INTO settings(save_path, upload_limit, download_limit) "
+                        "VALUES('downloads', NULL, NULL);"))
     cur.execute(sql.SQL('DROP TABLE IF EXISTS torrents CASCADE;\n'
                         'CREATE TABLE IF NOT EXISTS torrents\n'
                         '(\n'
