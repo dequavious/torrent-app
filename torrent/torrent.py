@@ -80,12 +80,13 @@ class Torrent:
         else:
             decoded_data = lt.bdecode(open(self.filepath, 'rb').read())
             for tracker in trackers:
-                if decoded_data.get('announce-list'):
-                    if tracker not in decoded_data['announce-list']:
-                        decoded_data['announce-list'].append([tracker])
+                self.info.add_tracker(tracker)
+                if decoded_data.get(b'announce-list'):
+                    if tracker not in decoded_data[b'announce-list']:
+                        decoded_data[b'announce-list'].append([tracker.encode('UTF-8')])
                 else:
-                    decoded_data['announce-list'] = []
-                    decoded_data['announce-list'].append([tracker])
+                    decoded_data[b'announce-list'] = []
+                    decoded_data[b'announce-list'].append([tracker])
 
             f = open(self.filepath, "wb")
             f.write(lt.bencode(decoded_data))
