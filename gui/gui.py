@@ -148,6 +148,13 @@ class GUI:
                              parent=self.window)
                     self.window.destroy()
 
+            def check_stopped(self):
+                while True:
+                    if self.parent.stopped:
+                        self.window.destroy()
+                        break
+                    time.sleep(1)
+
             def __init__(self, parent):
                 self.parent = parent
 
@@ -305,6 +312,8 @@ class GUI:
                        bg='#081947',
                        fg='#fff',
                        ).pack(side=LEFT, padx=10, pady=10)
+
+                Thread(target=self.check_stopped, daemon=True).start()
 
                 self.window.mainloop()
 
