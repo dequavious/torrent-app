@@ -36,13 +36,9 @@ are saved upon exit along with their settings and resume when the app is started
 
 ## STEPS TO RUN APPLICATION
 1. Open terminal in the project directory
-2. Activate virtual environment
-    ```
-    $ . venv/bin/activate
-    ```
-3. Run app.py
-    ```
-    $ python3 main.py
-    ```
+2. Run app using:
+   ```
+   $ bash scripts/run.sh
+   ```
 
 * Download a torrent in the search results by double-clicking on it.

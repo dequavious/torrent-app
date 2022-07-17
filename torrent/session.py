@@ -4,7 +4,7 @@ from shutil import SameFileError
 
 import libtorrent as lt
 
-from torrent import Torrent
+from .torrent import Torrent
 
 
 class Session:

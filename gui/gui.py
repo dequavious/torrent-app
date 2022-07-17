@@ -8,9 +8,9 @@ from tkinter.messagebox import showerror, showinfo, askokcancel
 from tkinter.scrolledtext import ScrolledText
 from tkinter.ttk import Progressbar, Treeview, Style, Notebook
 
-from db import DB
-from scraper import Scraper, get_magnet_link
-from session import Session
+from database.db import DB
+from scraper.scraper import Scraper, get_magnet_link
+from torrent.session import Session
 
 PAUSE = 0
 RESUME = 1
@@ -387,10 +387,10 @@ class GUI:
                                            mode='determinate', length=880)
             self.progressbar.pack(side=LEFT)
 
-            self.PAUSE_IMG = PhotoImage(file='images/pause.jpg').subsample(30, 35)
-            self.PLAY_IMG = PhotoImage(file='images/play.jpg').subsample(15, 18)
-            self.DELETE_IMG = PhotoImage(file='images/delete.jpg').subsample(17, 20)
-            self.SETTINGS_IMG = PhotoImage(file='images/settings.jpg').subsample(55, 67)
+            self.PAUSE_IMG = PhotoImage(file='gui/images/pause.jpg').subsample(30, 35)
+            self.PLAY_IMG = PhotoImage(file='gui/images/play.jpg').subsample(15, 18)
+            self.DELETE_IMG = PhotoImage(file='gui/images/delete.jpg').subsample(17, 20)
+            self.SETTINGS_IMG = PhotoImage(file='gui/images/settings.jpg').subsample(55, 67)
 
             self.delete_btn = Button(self.frame, image=self.DELETE_IMG, compound=CENTER, command=lambda: self.delete())
             self.delete_btn.pack(side=RIGHT, anchor='n')
