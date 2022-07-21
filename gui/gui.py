@@ -410,7 +410,7 @@ class GUI:
             self.delete_btn = Button(self.frame, image=self.DELETE_IMG, compound=CENTER, command=lambda: self.delete())
             self.delete_btn.pack(side=RIGHT, anchor='n')
             self.settings_btn = Button(self.frame, image=self.SETTINGS_IMG, compound=CENTER,
-                                       command=lambda: Thread(target=self.Settings, daemon=True, args=(self, )).start(),
+                                       command=lambda: self.Settings(self),
                                        state='disabled')
             self.settings_btn.pack(side=RIGHT, anchor='n')
             self.pause_play_btn = Button(self.frame, image=self.PAUSE_IMG, compound=CENTER,
