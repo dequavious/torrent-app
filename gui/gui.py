@@ -797,7 +797,8 @@ class GUI:
         self.add_menu = Menu(self.menu)
         self.menu.add_cascade(label='Add', menu=self.add_menu)
         self.add_menu.add_command(label='Magnet', command=lambda: self.Magnet(self))
-        self.add_menu.add_command(label='Torrent', command=lambda: self.open_torrent())
+        self.add_menu.add_command(label='Torrent', command=lambda: Thread(target=self.open_torrent,
+                                                                          daemon=True).start())
         self.menu.add_command(label='Settings', command=lambda: self.Settings(self))
 
         self.style = Style()
