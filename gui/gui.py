@@ -78,7 +78,7 @@ class GUI:
 
                     opt = OptionMenu(label_frame, self.variable, *PRIORITIES)
                     opt.config(font=('Helvetica', 12))
-                    opt.pack(padx=5, side=RIGHT)
+                    opt.pack(padx=5, side=LEFT)
 
                     self.variable.trace("w", self.set_priority)
 
@@ -155,8 +155,13 @@ class GUI:
                             self.window.destroy()
                             break
                         time.sleep(1)
-                except TclError:
+                except (TclError, RuntimeError):
                     pass
+
+            def display_files(self):
+                for i, file in enumerate(self.files):
+                    self.File(self.parent, self.frame2, file, i)
+                self.frame2.pack(expand=True, fill=BOTH, padx=5, pady=5)
 
             def __init__(self, parent):
                 self.parent = parent
@@ -177,17 +182,15 @@ class GUI:
                 tab_control.add(general_tab, text='General')
                 tab_control.pack(expand=True, fill=BOTH)
 
-                files = parent.torrent.get_files()
-                frame2 = ScrollableFrame(files_tab)
-                frame3 = Frame(frame2.scrollable_frame)
+                self.files = parent.torrent.get_files()
+                self.frame2 = ScrollableFrame(files_tab)
+                frame3 = Frame(self.frame2.scrollable_frame)
                 frame3.pack(fill=BOTH, pady=5)
                 filename_lbl = Label(frame3, text='FILENAME', font=('Times BOLD', 12))
                 filename_lbl.pack(side=LEFT)
                 priority_lbl = Label(frame3, text='PRIORITY', font=('Times BOLD', 12))
                 priority_lbl.pack(side=RIGHT)
-                for i, file in enumerate(files):
-                    self.File(parent, frame2, file, i)
-                frame2.pack(expand=True, fill=BOTH, padx=5, pady=5)
+                Thread(target=self.display_files, daemon=True).start()
 
                 frame = Frame(trackers_tab)
                 frame.pack(padx=5, pady=5, fill=X)
