@@ -9,7 +9,7 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter.ttk import Progressbar, Treeview, Style, Notebook
 
 from database.db import DB
-from scraper.scraper import Scraper, get_magnet_link
+from scraper.scraper import Scraper
 from torrent.session import Session
 
 PAUSE = 0
@@ -632,7 +632,7 @@ class GUI:
         item = self.tree.identify_row(event.y)
         if item:
             if not self.torrents.get(f"{self.results[int(item)]['name']}"):
-                magnet_link = get_magnet_link(self.results[int(item)]['link'])
+                magnet_link = self.scraper.get_magnet_link(self.results[int(item)]['link'])
                 if magnet_link != '':
                     torrent = self.session.add_magnet(magnet_link, torrent_name=self.results[int(item)]['name'])
                     if torrent is not None:
