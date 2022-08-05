@@ -597,8 +597,7 @@ class GUI:
 
             self.page = page
             self.search = search
-            self.scraper = Scraper(search)
-            self.scraper.scrape(page)
+            self.scraper.scrape(search, page)
             self.results = self.scraper.torrents
 
             self.tree.delete(*self.tree.get_children())
@@ -619,14 +618,10 @@ class GUI:
             self.search_btn['state'] = 'normal'
 
     def previous(self):
-        page = self.page - 1
-        if 1 <= page <= self.scraper.pages:
-            self.scrape(self.search, page)
+        self.scrape(self.search, self.page - 1)
 
     def next(self):
-        page = self.page + 1
-        if 1 <= page <= self.scraper.pages:
-            self.scrape(self.search, page)
+        self.scrape(self.search, self.page + 1)
 
     def download(self, event):
         item = self.tree.identify_row(event.y)
@@ -704,7 +699,7 @@ class GUI:
     def __init__(self):
         self.db = DB()
         self.save_path = self.db.get_save_path()
-        self.scraper = None
+        self.scraper = Scraper()
         self.search = ""
         self.page = 1
         self.torrents = {}

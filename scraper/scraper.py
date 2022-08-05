@@ -50,9 +50,9 @@ class Scraper:
                 pass
 
     def get_torrent_info(self, row, index):
-        element = row.find('td', {'class': re.compile(r'^.*name.*$')})
-        name = re.sub(r'\n', '', element.text)
-        link = f"{self.site}{element.find_all('a')[1].attrs['href']}"
+        element = row.find('td', {'class': re.compile(r'^.*name.*$')}).find_all('a')[-1]
+        name = element.text
+        link = f"{self.site}{element.attrs['href']}"
         seeds = int(row.find('td', {'class': re.compile(r'^.*seeds.*$')}).text)
         leech = int(row.find('td', {'class': re.compile(r'^.*leeches.*$')}).text)
         size = re.sub(r'\s|\d+$', '', row.find('td', {'class': re.compile(r'^.*size.*$')}).text)
@@ -65,12 +65,15 @@ class Scraper:
             'size': size,
         }
 
-    def scrape(self, page):
-        if 1 < page <= self.pages:
-            self.dom = self.get_dom(page)
+    def scrape(self, search, page):
+        self.page = page
+        self.search = search
+
+        self.soup = self.get_page()
+        self.pages = self.get_nr_pages()
 
         try:
-            table = self.dom.find('tbody')
+            table = self.soup.find('tbody')
             rows = table.find_all('tr')
 
             self.torrents = np.empty(len(rows), dtype=object)
@@ -84,11 +87,11 @@ class Scraper:
         except (ConnectionError, AttributeError):
             self.torrents = []
 
-    def get_dom(self, page):
+    def get_page(self):
         url = f'{self.site}/search/'
         terms = self.search.split()
         url += '+'.join(terms)
-        url += f'/{page}/'
+        url += f'/{self.page}/'
         try:
             r = self.session.get(url)
             while not r.ok:
@@ -98,8 +101,18 @@ class Scraper:
         except ConnectionError:
             return None
 
-    def __init__(self, search_term):
-        self.search = search_term
+    def get_nr_pages(self):
+        try:
+            list_items = self.soup.find('div', class_='pagination').find('ul').find_all('li')
+            if len(list_items) > 1:
+                link = list_items[-1].find('a').attrs['href']
+                return int(re.findall(r'\d+', link)[-1])
+            else:
+                return 1
+        except (AttributeError, IndexError):
+            return 1
+
+    def __init__(self):
         self.site = 'https://www.1337x.to'
 
         with requests.Session() as self.session:
@@ -107,16 +120,8 @@ class Scraper:
                 "User-Agent": get_random_user_agent()}
             self.session.get(self.site)
 
-        self.dom = self.get_dom(1)
-
-        try:
-            list_items = self.dom.find('div', class_='pagination').find('ul').find_all('li')
-            if not list_items[-1].find('a').text == '>>':
-                link = list_items[-1].find('a').attrs['href']
-                self.pages = int(re.findall(r'\d+', link)[-1])
-            else:
-                self.pages = int(list_items[-2].find('a').text)
-        except (AttributeError, IndexError):
-            self.pages = 1
-
+        self.soup = None
+        self.page = None
+        self.pages = None
+        self.search = None
         self.torrents = []
