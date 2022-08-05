@@ -55,7 +55,7 @@ class Scraper:
         link = f"{self.site}{element.find_all('a')[1].attrs['href']}"
         seeds = int(row.find('td', {'class': re.compile(r'^.*seeds.*$')}).text)
         leech = int(row.find('td', {'class': re.compile(r'^.*leeches.*$')}).text)
-        size = re.sub(r'\s', '', row.find('td', {'class': re.compile(r'^.*size.*$')}).text)
+        size = re.sub(r'\s|\d+$', '', row.find('td', {'class': re.compile(r'^.*size.*$')}).text)
 
         self.torrents[index] = {
             'name': name,
