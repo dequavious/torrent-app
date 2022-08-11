@@ -32,7 +32,7 @@ if __name__ == "__main__":
     cur = conn.cursor()
 
     cur.execute("""DROP TABLE IF EXISTS settings;
-                    CREATE TABLE IF NOT EXISTS settings
+                    CREATE TABLE settings
                     (
                     "id" SERIAL PRIMARY KEY NOT NULL,
                     "save_path" text NOT NULL,
@@ -41,7 +41,7 @@ if __name__ == "__main__":
                     );""")
     cur.execute("""INSERT INTO settings(save_path, upload_limit, download_limit) VALUES('downloads', NULL, NULL);""")
     cur.execute("""DROP TABLE IF EXISTS torrents CASCADE;
-                    CREATE TABLE IF NOT EXISTS torrents
+                    CREATE TABLE torrents
                     (
                     "id" INTEGER PRIMARY KEY NOT NULL,
                     "name" text NOT NULL,
@@ -52,7 +52,7 @@ if __name__ == "__main__":
                     "sequential" BOOLEAN NOT NULL
                     );""")
     cur.execute("""DROP TABLE IF EXISTS priorities CASCADE;
-                    CREATE TABLE IF NOT EXISTS priorities
+                    CREATE TABLE priorities
                     (
                     "id" SERIAL PRIMARY KEY NOT NULL,
                     "tid" INTEGER,
