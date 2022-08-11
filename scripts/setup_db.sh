@@ -7,5 +7,16 @@ sudo -u postgres psql --command="ALTER USER ${username} with password '${passwor
 
 parent_path=$( cd "$(dirname "${BASH_SOURCE[1]}")" ; pwd -P )
 cd "$parent_path"
+
 . venv/bin/activate
-python3 database/setupdb.py  ${username} ${password}
+
+cd database
+
+if test -f .env; then
+    rm .env
+fi
+
+echo "POSTGRES_USERNAME=${username}" >> .env
+echo "POSTGRES_PASSWORD=${password}" >> .env
+
+python3 setupdb.py

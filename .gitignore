@@ -6,3 +6,4 @@ __pycache__
 downloads
 *.iml
 .DS_Store
+.env
