@@ -7,16 +7,9 @@ adding trackers, enabling sequential downloads, setting upload/download limits, 
 are saved upon exit along with their settings and resume when the app is started again.
 ## Requirements
 1. Open terminal in project directory.
-2. Install all system requirements and required python packages:
+2. Install all system requirements, required python packages and setup PostgreSQL database:
    ```
    $ bash scripts/install.sh
-   ```
-
-### PostgreSQL database setup
-1. Open terminal in project directory.
-2. Set the PostgreSQL superuser password and create the database to store all relevant torrent settings and info using
-   ```
-   $ bash scripts/setup_db.sh
    ```
 
 ## How to run application

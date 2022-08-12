@@ -13,6 +13,8 @@ python3 -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
 
+bash scripts/setup_db.sh
+
 cd ~/Desktop
 echo "[Desktop Entry]
       Version=1.0
