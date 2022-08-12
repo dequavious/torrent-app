@@ -18,15 +18,15 @@ bash scripts/setup_db.sh
 
 cd ~/Desktop
 echo "[Desktop Entry]
-      Version=1.0
-      Exec=bash ${SCRIPT_ABS_PATH}
-      Name=Torrent App
-      GenericName=Torrent App
-      Comment=Search/download torrents
-      Encoding=UTF-8
-      Terminal=false
-      Type=Application
-      Categories=Application;Torrenting;" > torrent_app.desktop
+Version=1.0
+Exec=/bin/bash ${SCRIPT_ABS_PATH}
+Name=Torrent App
+GenericName=Torrent App
+Comment=Search/download torrents
+Encoding=UTF-8
+Terminal=false
+Type=Application
+Categories=Application;Torrenting;" > torrent_app.desktop
 gio set torrent_app.desktop metadata::trusted true
 chmod a+x torrent_app.desktop
 
