@@ -20,7 +20,7 @@ BEGIN
       WHERE  rolname = '${username}') THEN
 	  ALTER USER ${username} WITH PASSWORD '${password}';
    ELSE
-   CREATE USER ${username} WITH PASSWORD '${username}';
+   CREATE USER ${username} WITH PASSWORD '${password}';
    END IF;
 END
 \$do\$;"
