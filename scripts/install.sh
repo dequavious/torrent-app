@@ -12,3 +12,18 @@ cd ..
 python3 -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
+
+cd ~/Desktop
+echo "[Desktop Entry]
+      Version=1.0
+      Exec=bash ${SCRIPT_RELATIVE_DIR}/run.sh
+      Name=Torrent App
+      GenericName=Torrent App
+      Comment=Search/download torrents
+      Encoding=UTF-8
+      Terminal=false
+      Type=Application
+      Categories=Application;Torrenting;" > torrent_app.desktop
+gio set torrent_app.desktop metadata::trusted true
+chmod a+x torrent_app.desktop
+
