@@ -7,6 +7,7 @@ sudo apt-get install libpq-dev python3-dev -y
 
 SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
 cd $SCRIPT_RELATIVE_DIR
+SCRIPT_ABS_PATH="$PWD/run.sh"
 cd ..
 
 python3 -m venv venv
@@ -18,7 +19,7 @@ bash scripts/setup_db.sh
 cd ~/Desktop
 echo "[Desktop Entry]
       Version=1.0
-      Exec=bash ${SCRIPT_RELATIVE_DIR}/run.sh
+      Exec=bash ${SCRIPT_ABS_PATH}/run.sh
       Name=Torrent App
       GenericName=Torrent App
       Comment=Search/download torrents
