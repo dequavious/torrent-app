@@ -19,7 +19,7 @@ bash scripts/setup_db.sh
 cd ~/Desktop
 echo "[Desktop Entry]
       Version=1.0
-      Exec=bash ${SCRIPT_ABS_PATH}/run.sh
+      Exec=bash ${SCRIPT_ABS_PATH}
       Name=Torrent App
       GenericName=Torrent App
       Comment=Search/download torrents
