@@ -12,8 +12,9 @@ if __name__ == "__main__":
 
     conn = psycopg2.connect(
         host='localhost',
-        user=username,
-        password=password)
+        user=os.getenv('POSTGRES_SUPER_USERNAME'),
+        password=os.getenv('POSTGRES_SUPER_PASSWORD')
+    )
 
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
