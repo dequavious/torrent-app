@@ -20,6 +20,7 @@ are saved upon exit along with their settings and resume when the app is started
    ```
 
 ## How to run application
+You can either run the desktop icon that has been created, or:
 1. Open terminal in the project directory
 2. Run app using:
    ```
