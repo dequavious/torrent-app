@@ -5,8 +5,9 @@ echo "Enter a password you would like to use for the postgres superuser: "
 read password
 sudo -u postgres psql --command="ALTER USER ${username} with password '${password}';"
 
-parent_path=$( cd "$(dirname "${BASH_SOURCE[1]}")" ; pwd -P )
-cd "$parent_path"
+SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
+cd $SCRIPT_RELATIVE_DIR
+cd ..
 
 . venv/bin/activate
 
