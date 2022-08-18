@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 echo "Enter your postgres superuser username: "
 read superuser_username
 echo "Enter a password you would like to use for the postgres superuser: "
