@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import psycopg2
 from dotenv import load_dotenv
@@ -40,7 +41,8 @@ if __name__ == "__main__":
                     "upload_limit" INTEGER,
                     "download_limit" INTEGER
                     );""")
-    cur.execute("""INSERT INTO settings(save_path, upload_limit, download_limit) VALUES('downloads', NULL, NULL);""")
+    cur.execute(f"""INSERT INTO settings(save_path, upload_limit, download_limit) 
+                    VALUES('{Path(__file__).parent.parent}/downloads', NULL, NULL);""")
     cur.execute("""DROP TABLE IF EXISTS torrents CASCADE;
                     CREATE TABLE torrents
                     (
