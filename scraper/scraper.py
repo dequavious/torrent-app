@@ -1,11 +1,13 @@
 import re
+from dataclasses import dataclass
 from random import randint
-from threading import Thread
 
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError
+
+from utils.process import thread_pool_results
 
 
 def get_random_user_agent():
@@ -36,7 +38,18 @@ def get_random_user_agent():
     return user_agents[randint(0, len(user_agents) - 1)]
 
 
+@dataclass
 class Scraper:
+    site = 'https://www.1337x.to'
+    page = None
+    torrents = []
+
+    def __post_init__(self):
+        with requests.Session() as self.session:
+            self.session.headers = {
+                "User-Agent": get_random_user_agent()}
+            self.session.get(self.site)
+
     def get_magnet_link(self, link):
         while True:
             r = self.session.get(link)
@@ -46,10 +59,10 @@ class Scraper:
             dom = BeautifulSoup(html, 'html.parser')
             try:
                 return dom.find('a', {'href': re.compile(r'^magnet:\?xt=urn:btih:.*$')}).attrs['href']
-            except AttributeError:
-                pass
+            except AttributeError as e:
+                print("_get_magnet_link", e)
 
-    def get_torrent_info(self, row, index):
+    def _get_torrent_info(self, row):
         element = row.find('td', {'class': re.compile(r'^.*name.*$')}).find_all('a')[-1]
         name = element.text
         link = f"{self.site}{element.attrs['href']}"
@@ -57,7 +70,7 @@ class Scraper:
         leech = int(row.find('td', {'class': re.compile(r'^.*leeches.*$')}).text)
         size = re.sub(r'\s|\d+$', '', row.find('td', {'class': re.compile(r'^.*size.*$')}).text)
 
-        self.torrents[index] = {
+        return {
             'name': name,
             'link': link,
             'seeds': seeds,
@@ -65,63 +78,45 @@ class Scraper:
             'size': size,
         }
 
-    def scrape(self, search, page):
-        self.page = page
-        self.search = search
-
-        self.soup = self.get_page()
-        self.pages = self.get_nr_pages()
+    def scrape(self, search, page_nr=1):
+        self.page = self._get_page(search, page_nr)
 
         try:
-            table = self.soup.find('tbody')
+            table = self.page.find('tbody')
             rows = table.find_all('tr')
 
-            self.torrents = np.empty(len(rows), dtype=object)
-
-            for i, row in enumerate(rows):
-                Thread(target=self.get_torrent_info, args=(row, i), daemon=True).start()
-
-            while (self.torrents == None).any():
-                pass
-
-        except (ConnectionError, AttributeError):
+            self.torrents = np.array(list(map(
+                lambda future: future.result(),
+                thread_pool_results(self._get_torrent_info, rows)
+            )))
+        except (ConnectionError, AttributeError) as e:
+            print("scrape", e)
             self.torrents = []
 
-    def get_page(self):
+    def _get_page(self, search, page_nr):
         url = f'{self.site}/search/'
-        terms = self.search.split()
+        terms = search.split()
         url += '+'.join(terms)
-        url += f'/{self.page}/'
+        url += f'/{page_nr}/'
         try:
             r = self.session.get(url)
             while not r.ok:
                 r = requests.get(url)
             html = r.content
             return BeautifulSoup(html, 'html.parser')
-        except ConnectionError:
+        except ConnectionError as e:
+            print("_get_page", e)
             return None
 
-    def get_nr_pages(self):
+    @property
+    def nr_pages(self):
         try:
-            list_items = self.soup.find('div', class_='pagination').find('ul').find_all('li')
+            list_items = self.page.find('div', class_='pagination').find('ul').find_all('li')
             if len(list_items) > 1:
                 link = list_items[-1].find('a').attrs['href']
                 return int(re.findall(r'\d+', link)[-1])
             else:
                 return 1
-        except (AttributeError, IndexError):
+        except (AttributeError, IndexError) as e:
+            print("nr_pages", e)
             return 1
-
-    def __init__(self):
-        self.site = 'https://www.1337x.to'
-
-        with requests.Session() as self.session:
-            self.session.headers = {
-                "User-Agent": get_random_user_agent()}
-            self.session.get(self.site)
-
-        self.soup = None
-        self.page = None
-        self.pages = None
-        self.search = None
-        self.torrents = []

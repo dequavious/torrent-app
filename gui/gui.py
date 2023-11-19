@@ -605,7 +605,7 @@ class GUI:
                 self.tree.insert(parent='', index='end', iid=f'{i}',
                                  values=(torrent['name'], torrent['seeds'], torrent['leech'], torrent['size']))
 
-            if self.page < self.scraper.pages:
+            if self.page < self.scraper.nr_pages:
                 self.next_btn['state'] = 'normal'
             else:
                 self.next_btn['state'] = 'disabled'
