@@ -6,6 +6,13 @@ a magnet link. Multiple concurrent torrent downloads are possible as well config
 adding trackers, enabling sequential downloads, setting upload/download limits, etc. Torrents that have not been removed 
 are saved upon exit along with their settings and resume when the app is started again.
 ## Requirements
+### Install chromedriver
+1. Find the appropriate `chromedriver` executable for your system from https://googlechromelabs.github.io/chrome-for-testing/#stable and copy the link.
+2. Download, extract and move the `chromedriver` executable to `/usr/bin/` using:
+    ```
+    $ bash scripts/chromedriver.sh <COPIED_LINK>
+    ```
+### Install other dependencies
 1. Open terminal in project directory.
 2. Install all system requirements, required python packages and setup PostgreSQL database:
    ```
