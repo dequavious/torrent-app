@@ -2,7 +2,6 @@ import re
 from dataclasses import dataclass
 from random import choice
 
-import numpy as np
 from bs4 import BeautifulSoup
 from requests import Session
 from requests.exceptions import ConnectionError
