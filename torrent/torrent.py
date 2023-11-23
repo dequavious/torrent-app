@@ -31,10 +31,7 @@ class Torrent:
             return True
 
     def get_files(self):
-        files = []
-        for i, file in enumerate(self.info.files()):
-            files.append(file)
-        return files
+        return self.info.files()
 
     def set_file_priority(self, i, value):
         self.handle.file_priority(i, value)
@@ -49,10 +46,7 @@ class Torrent:
         return self.handle.get_peer_info()
 
     def get_trackers(self):
-        trackers = []
-        for tracker in self.info.trackers():
-            trackers.append(tracker.url)
-        return trackers
+        return list(map(lambda tracker: tracker.url, self.info.trackers()))
 
     def set_upload_limit(self, limit):
         self.handle.set_upload_limit(limit)
