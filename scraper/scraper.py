@@ -63,10 +63,9 @@ class Scraper:
         self.driver.quit()
 
     def get_magnet_link(self, link):
-        r = self.session.get(link)
-        while not r.ok:
-            r = self.session.get(link)
-        html = r.content
+        with self.session.get(link) as r:
+            r.raise_for_status()
+            html = r.content
         dom = BeautifulSoup(html, 'html.parser')
         try:
             return dom.find('a', {'href': re.compile(r'^magnet:\?xt=urn:btih:.*$')}).attrs['href']
