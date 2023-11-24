@@ -2,13 +2,16 @@ import re
 from dataclasses import dataclass
 from random import choice
 
+import requests
 from bs4 import BeautifulSoup
-from requests import Session
-from requests.exceptions import ConnectionError
+from requests.exceptions import RequestException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from utils.process import thread_pool_results
+
+REQUESTS = 0
+CHROMEDRIVER = 1
 
 
 def get_random_user_agent():
@@ -51,7 +54,7 @@ class Scraper:
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(self.site)
 
-        with Session() as self.session:
+        with requests.Session() as self.session:
             self.session.headers = {
                 "User-Agent": get_random_user_agent()}
             self.session.get(self.site)
@@ -85,27 +88,51 @@ class Scraper:
             'size': size
         }
 
-    def scrape(self, search, page_nr=1):
-        url = f'{self.site}/search/'
-        terms = search.split()
-        url += '+'.join(terms)
-        url += f'/{page_nr}/'
-
-        self.driver.get(url)
-
-        html = self.driver.page_source
-        self.page = BeautifulSoup(html, 'html.parser')
-
+    def _scrape(self):
         try:
             table = self.page.find('tbody')
             rows = table.find_all('tr')
 
-            self.torrents = list(map(
+            return list(map(
                 lambda future: future.result(), thread_pool_results(self._get_torrent_info, rows)
             ))
-        except (ConnectionError, AttributeError) as e:
-            print("scrape", e)
-            self.torrents = []
+        except (RequestException, AttributeError) as e:
+            print("_scrape", e)
+            return []
+
+
+    def scrape(self, search, page_nr=1):
+        url = self._get_url(search, page_nr)
+        self.page = self._get_page(url)
+
+        torrents = self._scrape() if self.page else []
+        if not torrents:
+            self.page = self._get_page(url, CHROMEDRIVER)
+            torrents = self._scrape() if self.page else []
+        self.torrents = torrents
+
+    def _get_url(self, search, page_nr):
+        url = f'{self.site}/search/'
+        terms = search.split()
+        url += '+'.join(terms)
+        url += f'/{page_nr}/'
+        return url
+
+    def _get_page(self, url, method=REQUESTS):
+        try:
+            if method == REQUESTS:
+                with self.session.get(url) as r:
+                    r.raise_for_status()
+                    html = r.content
+            elif method == CHROMEDRIVER:
+                self.driver.get(url)
+                html = self.driver.page_source
+            else:
+                raise ValueError(f"Invalid method: {method}. Supported methods are {REQUESTS} and {CHROMEDRIVER}")
+            return BeautifulSoup(html, 'html.parser')
+        except RequestException as e:
+            print("_get_page", e)
+            return None
 
     @property
     def nr_pages(self):
