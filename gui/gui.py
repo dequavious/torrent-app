@@ -422,8 +422,7 @@ class Magnet:
             torrent = self.parent.session.add_magnet(self.text.get('1.0', 'end-1c'))
             if torrent is not None:
                 if not self.parent.torrents.get(f"{torrent.handle.name()}"):
-                    self.window.after(0, self.parent.start_download, torrent)
-                    # Thread(target=self.parent.start_download, daemon=True, args=(torrent,)).start()
+                    Thread(target=self.parent.start_download, daemon=True, args=(torrent,)).start()
                 else:
                     showerror('Error', 'Duplicate torrent.')
                 self.window.destroy()
