@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass
+from logging import basicConfig, INFO, getLogger
 from random import choice
 
 import requests
@@ -12,6 +13,10 @@ from utils.process import thread_pool_results
 
 REQUESTS = 0
 CHROMEDRIVER = 1
+
+
+basicConfig(level=INFO)
+logger = getLogger(__name__)
 
 
 def get_random_user_agent():
@@ -70,7 +75,7 @@ class Scraper:
         try:
             return dom.find('a', {'href': re.compile(r'^magnet:\?xt=urn:btih:.*$')}).attrs['href']
         except AttributeError as e:
-            print("_get_magnet_link", e)
+            logger.info(f"{self.get_magnet_link.__name__}: {e}")
 
     def _get_torrent_info(self, row):
         element = row.find('td', class_=re.compile(r'^.*name')).find_all('a')[-1]
@@ -96,7 +101,7 @@ class Scraper:
                 lambda future: future.result(), thread_pool_results(self._get_torrent_info, rows)
             ))
         except (RequestException, AttributeError) as e:
-            print("_scrape", e)
+            logger.info(f"{self._scrape.__name__}: {e}")
             return []
 
 
@@ -130,7 +135,7 @@ class Scraper:
                 raise ValueError(f"Invalid method: {method}. Supported methods are {REQUESTS} and {CHROMEDRIVER}")
             return BeautifulSoup(html, 'html.parser')
         except RequestException as e:
-            print("_get_page", e)
+            logger.info(f"{self._get_page.__name__}: {e}")
             return None
 
     @property
@@ -143,6 +148,6 @@ class Scraper:
             else:
                 return 1
         except (AttributeError, IndexError) as e:
-            print("nr_pages", e)
+            logger.info(f"{self.nr_pages.__name__}: {e}")
             return 1
 

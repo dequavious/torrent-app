@@ -1,8 +1,9 @@
 import time
-from pathlib import Path
+from urllib.parse import quote
 
 import libtorrent as lt
-from urllib.parse import quote
+
+from torrent.trackers import trackers
 
 
 class Torrent:
@@ -11,16 +12,9 @@ class Torrent:
             while not self.handle.has_metadata():
                 time.sleep(1)
             self.info = self.handle.get_torrent_info()
-            self._add_initial_trackers()
+            self.add_trackers(trackers)
         except RuntimeError:
             pass
-
-    def _add_initial_trackers(self):
-        file_path = Path(__file__).parent / 'trackers.txt'
-        with open(file_path, 'r') as file:
-            trackers = list(map(lambda line: line.strip(), file.readlines()))
-
-        self.add_trackers(trackers)
 
     def stop(self):
         self.session.remove_torrent(self.handle)

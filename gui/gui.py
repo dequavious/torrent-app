@@ -1,8 +1,10 @@
 import sys
 import time
 from _tkinter import TclError
+from pathlib import Path
 from threading import Thread
-from tkinter import *
+from tkinter import Frame, Canvas, Scrollbar, VERTICAL, ALL, NW, BOTH, LEFT, RIGHT, Y, LabelFrame, StringVar, \
+    OptionMenu, Tk, CENTER, W, Label, Button, X, IntVar, Checkbutton, Entry, PhotoImage, Menu
 from tkinter.filedialog import askopenfilename, askdirectory
 from tkinter.messagebox import showerror, showinfo, askokcancel
 from tkinter.scrolledtext import ScrolledText
@@ -16,6 +18,7 @@ PAUSE = 0
 RESUME = 1
 PRIORITIES = range(8)
 
+IMG_DIR = Path(__file__).parent / 'icons'
 
 class ScrollableFrame(Frame):
     def __init__(self, container, *args, **kwargs):
@@ -397,10 +400,10 @@ class Download:
                                        mode='determinate', length=880)
         self.progressbar.pack(side=LEFT)
 
-        self.PAUSE_IMG = PhotoImage(file='gui/images/pause.jpg').subsample(30, 35)
-        self.PLAY_IMG = PhotoImage(file='gui/images/play.jpg').subsample(15, 18)
-        self.DELETE_IMG = PhotoImage(file='gui/images/delete.jpg').subsample(17, 20)
-        self.SETTINGS_IMG = PhotoImage(file='gui/images/settings.jpg').subsample(55, 67)
+        self.PAUSE_IMG = PhotoImage(file=IMG_DIR / 'pause.jpg').subsample(30, 35)
+        self.PLAY_IMG = PhotoImage(file=IMG_DIR / 'play.jpg').subsample(15, 18)
+        self.DELETE_IMG = PhotoImage(file=IMG_DIR / 'delete.jpg').subsample(17, 20)
+        self.SETTINGS_IMG = PhotoImage(file=IMG_DIR / 'settings.jpg').subsample(55, 67)
 
         self.delete_btn = Button(self.frame, image=self.DELETE_IMG, compound=CENTER, command=lambda: self.delete())
         self.delete_btn.pack(side=RIGHT, anchor='n')
