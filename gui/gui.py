@@ -162,6 +162,11 @@ class TorrentSettings:
         except (TclError, RuntimeError):
             pass
 
+    def display_files(self):
+        list(map(lambda args: Thread(target=File, args=(self.parent, self.frame2, args[1], args[0]), daemon=True).start(), enumerate(self.files)))
+        self.frame2.pack(expand=True, fill=BOTH, padx=5, pady=5)
+
+
     def __init__(self, parent):
         self.parent = parent
 
@@ -188,8 +193,7 @@ class TorrentSettings:
         filename_lbl = Label(frame3, text='PRIORITIES', font=('Times BOLD', 12))
         filename_lbl.pack(side=LEFT)
 
-        list(map(lambda args: Thread(target=File, args=(self.parent, self.frame2, args[1], args[0]), daemon=True).start(), enumerate(self.files)))
-        self.frame2.pack(expand=True, fill=BOTH, padx=5, pady=5)
+        Thread(target=self.display_files, daemon=True).start()
 
         frame = Frame(trackers_tab)
         frame.pack(padx=5, pady=5, fill=X)
